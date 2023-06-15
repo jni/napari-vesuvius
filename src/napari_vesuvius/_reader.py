@@ -142,6 +142,7 @@ def imreads(root, pattern='*.tif', load_func=iio.imread, props_func=None):
 
 
 def extract_dimensions(string):
+    """Grab the array dimensions from the .vcps header string."""
     height_match = re.search(r'height: (\d+)', string)
     width_match = re.search(r'width: (\d+)', string)
     ndim_match = re.search(r'dim: (\d+)', string)
@@ -156,6 +157,7 @@ def extract_dimensions(string):
 
 
 def read_until(fin, suffix):
+    """Read bytes until we have read some substring or we're out of data."""
     output = b''
     last_read = b'dummy'
     while output[-len(suffix):] != suffix and last_read != b'':
@@ -165,26 +167,18 @@ def read_until(fin, suffix):
 
 
 def read_vcps(path):
-    """Take a path or list of paths and return a list of LayerData tuples.
-
-    Readers are expected to return data as a list of tuples, where each tuple
-    is (data, [add_kwargs, [layer_type]]), "add_kwargs" and "layer_type" are
-    both optional.
+    """Read the Volume Cartographer point cloud data
 
     Parameters
     ----------
-    path : str or list of str
-        Path to file, or list of paths.
+    path : str or pathlib.Path
+        Path to .vcps file.
 
     Returns
     -------
-    layer_data : list of tuples
-        A list of LayerData tuples where each tuple in the list contains
-        (data, metadata, layer_type), where data is a numpy array, metadata is
-        a dict of keyword arguments for the corresponding viewer.add_* method
-        in napari, and layer_type is a lower-case string naming the type of
-        layer. Both "meta", and "layer_type" are optional. napari will
-        default to layer_type=="image" if not provided
+    layer_data : tuple(np.ndarray, dict, str)
+        layer data containing the point coordinates, the name of the point
+        cloud, and the layer type ('points').
     """
     with open(path, mode='rb') as fin:
         prefix = read_until(fin, suffix=b'<>\n')
