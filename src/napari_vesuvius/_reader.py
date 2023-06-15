@@ -1,10 +1,13 @@
-"""
-This module is an example of a barebones numpy reader plugin for napari.
-
-It implements the Reader specification, but your plugin may choose to
-implement multiple readers or even other plugin contributions. see:
-https://napari.org/stable/plugins/guides.html?#readers
-"""
+"""Read .volpkg data."""
+from dataclasses import dataclass
+from typing import Protocol, Tuple
+from pathlib import Path
+from glob import glob
+import imageio.v3 as iio
+import dask
+import dask.array as da
+import toolz as tz
+import re
 import numpy as np
 
 
@@ -24,19 +27,144 @@ def napari_get_reader(path):
     """
     if isinstance(path, list):
         # reader plugins may be handed single path, or a list of paths.
-        # if it is a list, it is assumed to be an image stack...
-        # so we are only going to look at the first file.
+        # we are only going to look at the first file.
         path = path[0]
 
     # if we know we cannot read the file, we immediately return None.
-    if not path.endswith(".npy"):
+    if not path.endswith(".volpkg"):
         return None
 
     # otherwise we return the *function* that can read ``path``.
-    return reader_function
+    return read_volpkg
 
 
-def reader_function(path):
+def read_volpkg(path):
+    path = Path(path)
+    list_vpcs = path.glob('paths/*/pointset.vcps')
+    points = [read_vcps(p) for p in list_vpcs]
+    list_volumes = path.glob('volumes/*')
+    images = [(imreads(p), {'name': p.name}, 'image') for p in list_volumes]
+    return images + points
+
+
+class ImagePropertiesProto(Protocol):
+    shape : Tuple[int]
+    dtype : type
+
+
+@dataclass
+class ImageProperties:
+    shape : Tuple[int]
+    dtype : type
+
+
+def image_properties(filename) -> ImagePropertiesProto:
+    """Return the shape and dtype of the image data in filename.
+
+    This function uses iio.v3.improps."""
+    return iio.improps(filename)
+
+
+@tz.curry
+def image_properties_loaded(filename, load_func=iio.imread) -> ImageProperties:
+    loaded = load_func(filename)
+    return ImageProperties(shape=loaded.shape, dtype=loaded.dtype)
+
+
+@tz.curry
+def _load_block(files_array, block_id=None,
+        *,
+        n_leading_dim,
+        load_func=iio.imread):
+    image = np.asarray(load_func(files_array[block_id[:n_leading_dim]]))
+    return image[(np.newaxis,) * n_leading_dim]
+
+
+def _find_shape(file_sequence):
+    n_total = len(file_sequence)
+    parents = {p.parent for p in file_sequence}
+    n_parents = len(parents)
+    if n_parents == 1:
+        return (n_total,)
+    else:
+        return _find_shape(parents) + (n_total // n_parents,)
+
+
+def imreads(root, pattern='*.tif', load_func=iio.imread, props_func=None):
+    """Read images from root (heh) folder.
+
+    Parameters
+    ----------
+    root : str | pathlib.Path
+        The root folder containing the hierarchy of image files.
+    pattern : str
+        A glob pattern with zero or more levels of subdirectories. Each level
+        will be counted as a dimension in the output array. Directories *must*
+        be specified with a forward slash ("/").
+    load_func : Callable[Path | str, np.ndarray]
+        The function to load individual arrays from files.
+    props_func : Callable[Path | str, ImageProperties]
+        A function to get the array shape from a file. If omitted, `load_func`
+        is called on the first file to get the shape. In some cases,
+        `image_properties` is the most efficient function here and may avoid
+        loading a large image into memory.
+
+    Returns
+    -------
+    stacked : dask.array.Array
+        The stacked dask array. The array will have the number of dimensions of
+        each image plus one per directory level.
+    """
+    if props_func is None:
+        if load_func is not iio.imread:
+            props_func = image_properties_loaded(load_func=load_func)
+        else:
+            props_func = image_properties
+    root = Path(root)
+    files = sorted(root.glob(pattern))
+    if len(files) == 0:
+        raise ValueError(
+                f'no files found at path {root} with pattern {pattern}.'
+                )
+    leading_shape = _find_shape(files)
+    n_leading_dim = len(leading_shape)
+    props = props_func(files[0])
+    lagging_shape = props.shape
+    files_array = np.array(list(files)).reshape(leading_shape)
+    chunks = tuple((1,) * shp for shp in leading_shape) + lagging_shape
+    stacked = da.map_blocks(
+            _load_block(n_leading_dim=n_leading_dim, load_func=load_func),
+            files_array,
+            chunks=chunks,
+            dtype=props.dtype,
+            )
+    return stacked
+
+
+def extract_dimensions(string):
+    height_match = re.search(r'height: (\d+)', string)
+    width_match = re.search(r'width: (\d+)', string)
+    ndim_match = re.search(r'dim: (\d+)', string)
+
+    if height_match and width_match and ndim_match:
+        height = int(height_match.group(1))
+        width = int(width_match.group(1))
+        ndim = int(ndim_match.group(1))
+        return height, width, ndim
+    else:
+        return None
+
+
+def read_until(fin, suffix):
+    output = b''
+    last_read = b'dummy'
+    while output[-len(suffix):] != suffix and last_read != b'':
+        last_read = fin.read(1)
+        output += last_read
+    return output.decode()
+
+
+def read_vcps(path):
     """Take a path or list of paths and return a list of LayerData tuples.
 
     Readers are expected to return data as a list of tuples, where each tuple
@@ -58,15 +186,15 @@ def reader_function(path):
         layer. Both "meta", and "layer_type" are optional. napari will
         default to layer_type=="image" if not provided
     """
-    # handle both a string and a list of strings
-    paths = [path] if isinstance(path, str) else path
-    # load all files into array
-    arrays = [np.load(_path) for _path in paths]
-    # stack arrays into single array
-    data = np.squeeze(np.stack(arrays))
+    with open(path, mode='rb') as fin:
+        prefix = read_until(fin, suffix=b'<>\n')
+        shape = extract_dimensions(prefix)
+        point_data = np.frombuffer(fin.read(), dtype=np.float64,
+                                   count=np.product(shape)).reshape(shape)
 
-    # optional kwargs for the corresponding viewer.add_* method
-    add_kwargs = {}
+    # we transpose to napari pln/row/col coordinates, and discard "rows"
+    flipped = np.flip(point_data, axis=-1)
+    reshaped = np.reshape(flipped, (-1, shape[-1]))
+    name = Path(path).parent.name
+    return reshaped, {'name': name}, 'points'
 
-    layer_type = "image"  # optional, default is "image"
-    return [(data, add_kwargs, layer_type)]
