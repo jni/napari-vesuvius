@@ -1,0 +1,48 @@
+name: napari-vesuvius
+display_name: napari vesuvius
+contributions:
+  commands:
+    - id: napari-vesuvius.get_reader
+      python_name: napari_vesuvius._reader:napari_get_reader
+      title: Open data with napari vesuvius
+    - id: napari-vesuvius.write_multiple
+      python_name: napari_vesuvius._writer:write_multiple
+      title: Save multi-layer data with napari vesuvius
+    - id: napari-vesuvius.write_single_image
+      python_name: napari_vesuvius._writer:write_single_image
+      title: Save image data with napari vesuvius
+    - id: napari-vesuvius.make_sample_data
+      python_name: napari_vesuvius._sample_data:make_sample_data
+      title: Load sample data from napari vesuvius
+    - id: napari-vesuvius.make_qwidget
+      python_name: napari_vesuvius._widget:ExampleQWidget
+      title: Make example QWidget
+    - id: napari-vesuvius.make_magic_widget
+      python_name: napari_vesuvius._widget:example_magic_widget
+      title: Make example magic widget
+    - id: napari-vesuvius.make_func_widget
+      python_name: napari_vesuvius._widget:example_function_widget
+      title: Make example function widget
+  readers:
+    - command: napari-vesuvius.get_reader
+      accepts_directories: false
+      filename_patterns: ['*.npy']
+  writers:
+    - command: napari-vesuvius.write_multiple
+      layer_types: ['image*','labels*']
+      filename_extensions: []
+    - command: napari-vesuvius.write_single_image
+      layer_types: ['image']
+      filename_extensions: ['.npy']
+  sample_data:
+    - command: napari-vesuvius.make_sample_data
+      display_name: napari vesuvius
+      key: unique_id.1
+  widgets:
+    - command: napari-vesuvius.make_qwidget
+      display_name: Example QWidget
+    - command: napari-vesuvius.make_magic_widget
+      display_name: Example Magic Widget
+    - command: napari-vesuvius.make_func_widget
+      autogenerate: true
+      display_name: Example Function Widget
