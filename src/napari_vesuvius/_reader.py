@@ -8,6 +8,7 @@ import dask.array as da
 import toolz as tz
 import re
 import numpy as np
+from vispy.io import read_mesh
 
 
 def napari_get_reader(path):
@@ -43,7 +44,9 @@ def read_volpkg(path):
     points = [read_vcps(p) for p in list_vpcs]
     list_volumes = path.glob('volumes/*')
     images = [(imreads(p), {'name': p.name}, 'image') for p in list_volumes]
-    return images + points
+    list_meshes = path.glob('paths/*/*.obj')
+    surfaces = [read_mesh_extra(p) for p in list_meshes]
+    return images + points + surfaces
 
 
 class ImagePropertiesProto(Protocol):
@@ -191,3 +194,19 @@ def read_vcps(path):
     name = Path(path).parent.name
     return reshaped, {'name': name}, 'points'
 
+
+def read_mesh_extra(path):
+    """Read a mesh and its associated texture (if present)."""
+    p = Path(path)
+    vertices, faces, normals, texcoords = read_mesh(p.as_posix())
+    texture = None
+    image_path = (p.parent / p.stem).with_suffix('.tif')
+    if image_path.exists():
+        texture = iio.imread(image_path.as_posix())
+    layer_data = (vertices, faces)
+    layer_data_tuple = (
+            layer_data,
+            {'name': p.stem, 'texture': texture, 'texcoords': texcoords},
+            'surface',
+    )
+    return layer_data_tuple
