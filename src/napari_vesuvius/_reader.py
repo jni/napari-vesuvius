@@ -189,5 +189,5 @@ def read_vcps(path):
     flipped = np.flip(point_data, axis=-1)
     reshaped = np.reshape(flipped, (-1, shape[-1]))
     name = Path(path).parent.name
-    return reshaped, {'name': name}, 'points'
+    return reshaped, {'name': name, 'size': 3}, 'points'
 
