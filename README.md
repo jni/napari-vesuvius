@@ -1,13 +1,6 @@
 # napari-vesuvius
 
-[![License Mozilla Public License 2.0](https://img.shields.io/pypi/l/napari-vesuvius.svg?color=green)](https://github.com/jni/napari-vesuvius/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/napari-vesuvius.svg?color=green)](https://pypi.org/project/napari-vesuvius)
-[![Python Version](https://img.shields.io/pypi/pyversions/napari-vesuvius.svg?color=green)](https://python.org)
-[![tests](https://github.com/jni/napari-vesuvius/workflows/tests/badge.svg)](https://github.com/jni/napari-vesuvius/actions)
-[![codecov](https://codecov.io/gh/jni/napari-vesuvius/branch/main/graph/badge.svg)](https://codecov.io/gh/jni/napari-vesuvius)
-[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-vesuvius)](https://napari-hub.org/plugins/napari-vesuvius)
-
-Plugin to work with Vesuvius Challenge data
+[napari] plugin to work with [Vesuvius Challenge] data
 
 Currently provides a widget to read in .volpkg image and points data. Use it with:
 
@@ -61,6 +54,7 @@ If you encounter any problems, please [file an issue] along with a detailed desc
 [file an issue]: https://github.com/jni/napari-vesuvius/issues
 
 [napari]: https://github.com/napari/napari
+[Vesuvius Challenge]: https://scrollprize.org/
 [Cookiecutter]: https://github.com/audreyr/cookiecutter
 [@napari]: https://github.com/napari
 [Mozilla Public License 2.0]: https://www.mozilla.org/media/MPL/2.0/index.txt
