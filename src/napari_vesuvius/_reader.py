@@ -2,7 +2,6 @@
 from dataclasses import dataclass
 from typing import Protocol, Tuple
 from pathlib import Path
-from glob import glob
 import imageio.v3 as iio
 import dask
 import dask.array as da
