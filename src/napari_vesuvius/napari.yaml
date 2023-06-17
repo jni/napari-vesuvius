@@ -31,7 +31,7 @@ contributions:
   sample_data:
     - command: napari-vesuvius.sample_data_campfire_raw
       display_name: Campfire raw data
-      key: napari_vesuvius_campfire_raw
+      key: campfire/raw
     - command: napari-vesuvius.sample_data_campfire_rec
       display_name: Campfire reconstructed data
-      key: napari_vesuvius_campfire_rec
+      key: campfire/rec
