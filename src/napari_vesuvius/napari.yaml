@@ -11,18 +11,12 @@ contributions:
     - id: napari-vesuvius.write_single_image
       python_name: napari_vesuvius._writer:write_single_image
       title: Save image data with napari vesuvius
-    - id: napari-vesuvius.make_sample_data
-      python_name: napari_vesuvius._sample_data:make_sample_data
-      title: Load sample data from napari vesuvius
-    - id: napari-vesuvius.make_qwidget
-      python_name: napari_vesuvius._widget:ExampleQWidget
-      title: Make example QWidget
-    - id: napari-vesuvius.make_magic_widget
-      python_name: napari_vesuvius._widget:example_magic_widget
-      title: Make example magic widget
-    - id: napari-vesuvius.make_func_widget
-      python_name: napari_vesuvius._widget:example_function_widget
-      title: Make example function widget
+    - id: napari-vesuvius.sample_data_campfire_rec
+      python_name: napari_vesuvius._sample_data:fetch_campfire_rec
+      title: Load the reconstructed campfire sample dataset
+    - id: napari-vesuvius.sample_data_campfire_raw
+      python_name: napari_vesuvius._sample_data:fetch_campfire_raw
+      title: Load the raw campfire sample dataset
   readers:
     - command: napari-vesuvius.get_reader
       accepts_directories: true
@@ -35,14 +29,9 @@ contributions:
       layer_types: ['image']
       filename_extensions: ['.npy']
   sample_data:
-    - command: napari-vesuvius.make_sample_data
-      display_name: napari vesuvius
-      key: unique_id.1
-  widgets:
-    - command: napari-vesuvius.make_qwidget
-      display_name: Example QWidget
-    - command: napari-vesuvius.make_magic_widget
-      display_name: Example Magic Widget
-    - command: napari-vesuvius.make_func_widget
-      autogenerate: true
-      display_name: Example Function Widget
+    - command: napari-vesuvius.sample_data_campfire_raw
+      display_name: Campfire raw data
+      key: napari_vesuvius_campfire_raw
+    - command: napari-vesuvius.sample_data_campfire_rec
+      display_name: Campfire reconstructed data
+      key: napari_vesuvius_campfire_rec
