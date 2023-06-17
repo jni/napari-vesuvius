@@ -54,7 +54,7 @@ def fetch_campfire_raw():
              'license': 'CC-BY-NC',
              'license-url': 'https://creativecommons.org/licenses/by-nc/2.0/',
          },
-         'rendering': 'attenuated_mip',
+         'rendering': 'minip',
         },
         'image',
     )]
