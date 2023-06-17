@@ -1,10 +1,6 @@
-"""
-This module is an example of a barebones sample data provider for napari.
+""" Sample data contributions from the Vesuvius Challenge.
 
-It implements the "sample data" specification.
-see: https://napari.org/stable/plugins/guides.html?#sample-data
-
-Replace code below according to your needs.
+For details about the data, see: https://scrollprize.org/data
 """
 from pathlib import Path
 import pooch
