@@ -2,7 +2,11 @@
 
 [napari] plugin to work with [Vesuvius Challenge] data
 
-Currently provides a widget to read in .volpkg image and points data. Use it with:
+## Current contributions
+
+### A reader to read in points and image data from a .volpkg file
+
+Use it with:
 
 ```
 napari path/to/data.volpkg
@@ -16,8 +20,31 @@ Alternatively, you can use it directly from Python, IPython, or Jupyter:
 
 ```python
 import napari
-viewer = napari.Viewer()
+viewer = napari.Viewer(ndisplay=3)  # start in 3D view
 layers = viewer.open('path/to/data.volpkg', plugin='napari-vesuvius')
+napari.run()  # not needed in IPython or Jupyter
+```
+
+### Sample data of the vesuvius campfire dataset
+
+You can use napari-vesuvius to quickly have a look at the [campfire demo
+dataset](https://gist.github.com/janpaul123/280262ebce904f7366fe4cc155593e90).
+
+To look at the data, you can either use the napari menu at File > Open Sample >
+napari-vesuvius > [Campfire raw data / Campfire reconstructed data]:
+
+
+
+(This is the raw x-ray tomography data using the 'minip' projection.)
+
+Or you can use the viewer API directly from Python:
+
+```python
+import napari
+viewer = napari.Viewer(ndisplay=3)  # start in 3D view
+layers = viewer.open_sample('napari-vesuvius', 'campfire/raw')
+# or
+# layers = viewer.open_sample('napari-vesuvius', 'campfire/rec')
 napari.run()  # not needed in IPython or Jupyter
 ```
 
