@@ -6,16 +6,55 @@ see: https://napari.org/stable/plugins/guides.html?#sample-data
 
 Replace code below according to your needs.
 """
-from __future__ import annotations
+from pathlib import Path
+import pooch
+from pooch import Unzip
+from ._version import version
+from ._reader import imreads
 
-import numpy
+fetcher = pooch.create(
+    # Use OS default cache folder
+    path=pooch.os_cache('napari-vesuvius'),
+    base_url='http://dl.ash2txt.org/',
+    version=version,
+    version_dev='main',
+    registry={
+        'campfire.zip': 'sha256:5857d1be412b597ce31605100852ddf6ea2946c6c0f7eb5a7cd14bff94cc5324',
+    },
+)
 
 
-def make_sample_data():
-    """Generates an image"""
-    # Return list of tuples
-    # [(data1, add_image_kwargs1), (data2, add_image_kwargs2)]
-    # Check the documentation for more information about the
-    # add_image_kwargs
-    # https://napari.org/stable/api/napari.Viewer.html#napari.Viewer.add_image
-    return [(numpy.random.rand(512, 512), {})]
+def fetch_campfire_rec():
+    unpack = Unzip(members=['campfire/rec'])
+    fnames = fetcher.fetch('campfire.zip', processor=unpack)
+    fname = Path(fnames[0]).parent
+    image = imreads(fname)
+    return [(
+        image,
+        {'name': 'campfire/rec',
+         'metadata': {
+             'license': 'CC-BY-NC',
+             'license-url': 'https://creativecommons.org/licenses/by-nc/2.0/',
+         },
+         'rendering': 'attenuated_mip',
+         },
+        'image',
+    )]
+
+
+def fetch_campfire_raw():
+    unpack = Unzip(members=['campfire/raw'])
+    fnames = fetcher.fetch('campfire.zip', processor=unpack)
+    fname = Path(fnames[0]).parent
+    image = imreads(fname)
+    return [(
+        image,
+        {'name': 'campfire/raw',
+         'metadata': {
+             'license': 'CC-BY-NC',
+             'license-url': 'https://creativecommons.org/licenses/by-nc/2.0/',
+         },
+         'rendering': 'attenuated_mip',
+        },
+        'image',
+    )]
