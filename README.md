@@ -33,9 +33,7 @@ dataset](https://gist.github.com/janpaul123/280262ebce904f7366fe4cc155593e90).
 To look at the data, you can either use the napari menu at File > Open Sample >
 napari-vesuvius > [Campfire raw data / Campfire reconstructed data]:
 
-
-
-(This is the raw x-ray tomography data using the 'minip' projection.)
+<img width="851" alt="Screenshot 2023-06-17 at 1 28 46 pm" src="https://github.com/jni/napari-vesuvius/assets/492549/79f3fc59-b626-4d67-8705-6100a8a4aa1b">
 
 Or you can use the viewer API directly from Python:
 
@@ -47,6 +45,9 @@ layers = viewer.open_sample('napari-vesuvius', 'campfire/raw')
 # layers = viewer.open_sample('napari-vesuvius', 'campfire/rec')
 napari.run()  # not needed in IPython or Jupyter
 ```
+
+<img width="1326" alt="Screenshot 2023-06-17 at 1 25 39 pm" src="https://github.com/jni/napari-vesuvius/assets/492549/1bd2276d-ca09-46ca-bac2-f6e47142aaf3">
+(This is the raw x-ray tomography data using the 'minip' projection.)
 
 ## TODO
 
