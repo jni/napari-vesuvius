@@ -2,6 +2,8 @@
 
 [napari] plugin to work with [Vesuvius Challenge] data
 
+https://github.com/jni/napari-vesuvius/assets/492549/cc34c7b1-3a35-495f-bf74-78fb0199e9d4
+
 ## Current contributions
 
 ### A reader to read in points and image data from a .volpkg file
